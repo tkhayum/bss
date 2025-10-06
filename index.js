@@ -1691,46 +1691,42 @@ function BeeSwarmSimulator(DATA){
                 player.addMessage('Activated x5 "Haste"')
             }
         },
-        honey_dispenser:{
+honey_dispenser:{
+    isMachine:true,
+    requirements:function(player){
+        if(!player.extraInfo.honeyDispenser) {
+            player.extraInfo.honeyDispenser = 0;
+        }
 
-            isMachine:true,requirements:function(player){
+        const cooldownTime = 1000; // 1 second
+        const elapsedTime = Date.now() - player.extraInfo.honeyDispenser;
 
-                if(!player.extraInfo.honeyDispenser)
-                    player.extraInfo.honeyDispenser=1
+        if(elapsedTime < cooldownTime){
+            const timeLeft = Math.ceil((cooldownTime - elapsedTime) / 1000);
+            return "The Honey Dispenser is on cooldown! (" + timeLeft + 's)';
+        }
+    },
+    minX:-21.5,
+    maxX:-17.5,
+    minY:-2,
+    maxY:1,
+    minZ:-8.5,
+    maxZ:-4.5,
+    message:'Use Honey Dispenser',
+    func:function(player){
+        player.extraInfo.honeyDispenser = Date.now();
+        const honeyToGive = BigInt(1_000_000_000_000); // 1 trillion
+        
+        // Ensure player.honey can handle BigInt. Add 'n' if it's a number.
+        if (typeof player.honey === 'number') {
+            player.honey = BigInt(player.honey);
+        }
 
-                if(Date.now()-player.extraInfo.honeyDispenser<60*60*1000){
+        player.honey += honeyToGive;
+        player.addMessage('+' + MATH.addCommas(honeyToGive.toString()) + ' Honey');
+    }
+}
 
-                    return "The Honey Dispenser is on cooldown! ("+MATH.doTime((60*60-(Date.now()-player.extraInfo.honeyDispenser)*0.001)+'')+')'
-                }
-
-            },minX:-21.5,maxX:-17.5,minY:-2,maxY:1,minZ:-8.5,maxZ:-4.5,message:'Use Honey Dispenser',func:function(player){
-
-                player.extraInfo.honeyDispenser=Math.ceil(Date.now())
-
-                player.honey+=objects.bees.length*objects.bees.length*objects.bees.length+100
-                player.addEffect('haste',false,false,undefined,5)
-                player.addMessage('+'+MATH.addCommas((objects.bees.length*objects.bees.length*objects.bees.length+100)+'')+' Honey')
-                player.addMessage('Activated x5 "Haste"')
-            }
-        },
-        scam_dispenser:{
-
-            isMachine:true,requirements:function(player){
-
-                if(items.ticket.amount<6) return "You need 6 tickets to buy a Royal Jelly!"
-
-            },minX:-29.5,maxX:-21.5,minY:0.5,maxY:3.5,minZ:7.75,maxZ:11.75,message:'Use Royal Jelly Dispenser (6 Tickets)',func:function(player){
-
-                items.royalJelly.amount++
-                items.ticket.amount-=6
-                player.addEffect('haste',false,false,undefined,10)
-                player.updateInventory()
-                player.addMessage('Congrats you got scammed! 6 tickets is a big waste')
-                player.addMessage('-6 Tickets')
-                player.addMessage('+1 Royal Jelly')
-                player.addMessage('Activated x10 "Haste"')
-            }
-        },
 
         glue_dispenser:{
 
@@ -34758,4 +34754,5 @@ function BeeSwarmSimulator(DATA){
         window.objects=objects
     }
     
+
 }
